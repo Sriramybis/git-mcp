@@ -197,6 +197,7 @@ async function createPullRequest(args: z.infer<typeof CreatePRSchema>) {
     pr_number: response.data.number,
     pr_url: response.data.html_url,
   };
+}
 
 async function readFileFromRepo(args: z.infer<typeof ReadFileSchema>) {
   const repoPath = getRepoPath(args.owner, args.repo);
@@ -299,7 +300,6 @@ async function analyzeRepository(args: z.infer<typeof AnalyzeRepoSchema>) {
   }
   
   return analysis;
-}
 }
 
 // MCP Server setup

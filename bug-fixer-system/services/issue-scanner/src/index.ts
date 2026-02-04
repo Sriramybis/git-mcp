@@ -17,7 +17,7 @@ const octokit = new Octokit({ auth: GITHUB_TOKEN });
 const ListRepositoriesSchema = z.object({
   username: z.string().optional(),
   org: z.string().optional(),
-  type: z.enum(["all", "owner", "member"]).optional(),
+  type: z.enum(["all", "owner", "member", "public", "private", "forks", "sources"]).optional(),
 });
 
 const FetchIssuesSchema = z.object({
@@ -108,13 +108,13 @@ async function listRepositories(args: z.infer<typeof ListRepositoriesSchema>) {
     if (args.org) {
       const response = await octokit.repos.listForOrg({
         org: args.org,
-        type: args.type || "all",
+        type: (args.type as any) || "all",
         per_page: 100,
       });
       repos = response.data;
     } else {
       const response = await octokit.repos.listForAuthenticatedUser({
-        type: args.type || "all",
+        type: (args.type as any) || "all",
         per_page: 100,
       });
       repos = response.data;

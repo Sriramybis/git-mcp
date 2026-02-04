@@ -14,7 +14,7 @@ Comprehensive guide for using the Automated Bug Fixing System with BOB AI Assist
 
 ### Starting a Session
 
-1. Open your MCP client (Cursor, Claude Desktop, etc.)
+1. Open IBM Bob IDE
 2. Ensure all MCP servers are connected
 3. Start interacting with BOB
 
