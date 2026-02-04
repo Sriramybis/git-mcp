@@ -1,0 +1,397 @@
+# 🔧 Setup Guide
+
+Complete setup instructions for the Automated Bug Fixing System.
+
+## Prerequisites
+
+### Required Software
+
+- **Node.js**: Version 18 or higher
+- **pnpm**: Package manager (or npm/yarn)
+- **Git**: Version 2.0 or higher
+- **GitHub Account**: With access to repositories you want to fix
+
+### Required Permissions
+
+Your GitHub Personal Access Token needs these scopes:
+- `repo` - Full control of private repositories
+- `read:org` - Read org and team membership (if using org repos)
+- `workflow` - Update GitHub Action workflows (optional)
+
+## Step-by-Step Setup
+
+### 1. Create GitHub Personal Access Token
+
+1. Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token (classic)"
+3. Give it a descriptive name: "Bug Fixer System"
+4. Select scopes:
+   - ✅ `repo` (all sub-scopes)
+   - ✅ `read:org`
+5. Click "Generate token"
+6. **Copy the token immediately** (you won't see it again!)
+
+### 2. Clone and Setup Project
+
+```bash
+# Navigate to your projects directory
+cd ~/Projects
+
+# If you haven't already, the bug-fixer-system should be in bobathon
+cd bobathon/bug-fixer-system
+
+# Or if starting fresh, create the structure
+mkdir -p bug-fixer-system
+cd bug-fixer-system
+```
+
+### 3. Setup Issue Scanner Service
+
+```bash
+cd services/issue-scanner
+
+# Install dependencies
+pnpm install
+
+# Create environment file
+cp .env.example .env
+
+# Edit .env and add your token
+nano .env  # or use your preferred editor
+```
+
+In `.env`:
+```bash
+GITHUB_TOKEN=ghp_your_actual_token_here
+```
+
+Build the service:
+```bash
+pnpm build
+```
+
+Test the service:
+```bash
+# Start the service (it will wait for MCP connections)
+pnpm start
+```
+
+### 4. Setup Git Operations Service
+
+```bash
+cd ../git-ops
+
+# Install dependencies
+pnpm install
+
+# Create environment file
+cp .env.example .env
+
+# Edit .env and add your token
+nano .env
+```
+
+In `.env`:
+```bash
+GITHUB_TOKEN=ghp_your_actual_token_here
+WORKSPACE_DIR=./workspace
+```
+
+Build the service:
+```bash
+pnpm build
+```
+
+### 5. Configure Your MCP Client
+
+Choose your MCP client and follow the appropriate configuration:
+
+#### Option A: Cursor
+
+Edit `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "gitmcp": {
+      "url": "https://gitmcp.io/docs"
+    },
+    "issue-scanner": {
+      "command": "node",
+      "args": [
+        "/Users/sriram/Projects/bobathon/bug-fixer-system/services/issue-scanner/dist/index.js"
+      ]
+    },
+    "git-ops": {
+      "command": "node",
+      "args": [
+        "/Users/sriram/Projects/bobathon/bug-fixer-system/services/git-ops/dist/index.js"
+      ]
+    }
+  }
+}
+```
+
+**Important**: Replace `/Users/sriram/Projects/bobathon` with your actual path!
+
+#### Option B: Claude Desktop
+
+Edit Claude Desktop config:
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "gitmcp": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://gitmcp.io/docs"]
+    },
+    "issue-scanner": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/bug-fixer-system/services/issue-scanner/dist/index.js"
+      ]
+    },
+    "git-ops": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/bug-fixer-system/services/git-ops/dist/index.js"
+      ]
+    }
+  }
+}
+```
+
+#### Option C: Windsurf
+
+Edit `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "gitmcp": {
+      "serverUrl": "https://gitmcp.io/docs"
+    },
+    "issue-scanner": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/bug-fixer-system/services/issue-scanner/dist/index.js"
+      ]
+    },
+    "git-ops": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/bug-fixer-system/services/git-ops/dist/index.js"
+      ]
+    }
+  }
+}
+```
+
+### 6. Configure Bug Fixing Settings
+
+Edit `config/bug-fix-config.json`:
+
+```json
+{
+  "repositories": [
+    "your-username/repo1",
+    "your-username/repo2",
+    "your-org/repo3"
+  ],
+  "filters": {
+    "labels": ["bug", "good-first-issue"],
+    "exclude_labels": ["wontfix", "duplicate", "invalid"],
+    "max_age_days": 90,
+    "min_age_days": 0
+  },
+  "prioritization": {
+    "criteria": ["severity", "age", "complexity"],
+    "severity_weights": {
+      "critical": 10,
+      "high": 7,
+      "medium": 5,
+      "low": 3
+    },
+    "auto_fix_threshold": "medium",
+    "max_issues_per_run": 10
+  },
+  "github": {
+    "token": "ghp_your_token_here",
+    "base_branch": "main",
+    "pr_prefix": "[AutoFix]",
+    "fork_repos": false
+  },
+  "git_operations": {
+    "workspace_dir": "./workspace",
+    "branch_prefix": "autofix/",
+    "commit_message_template": "Fix: {issue_title}\n\nResolves #{issue_number}\n\nAutomatic fix generated by BOB AI Assistant"
+  }
+}
+```
+
+**Important Configuration Notes:**
+
+- `repositories`: List all repos you want to scan (format: "owner/repo")
+- `labels`: Issues must have at least one of these labels
+- `exclude_labels`: Issues with these labels will be skipped
+- `max_issues_per_run`: Limit how many issues to process in one run
+- `base_branch`: Usually "main" or "master"
+- `fork_repos`: Set to `true` if you want to fork repos before creating PRs
+
+### 7. Restart Your MCP Client
+
+After configuration:
+
+1. **Cursor**: Restart Cursor completely
+2. **Claude Desktop**: Quit and reopen Claude Desktop
+3. **Windsurf**: Restart Windsurf
+
+### 8. Verify Setup
+
+Open your MCP client and ask BOB:
+
+```
+"List all available MCP tools"
+```
+
+You should see tools from three services:
+- **gitmcp**: `fetch_generic_documentation`, `search_generic_code`, etc.
+- **issue-scanner**: `list_repositories`, `fetch_issues`, etc.
+- **git-ops**: `clone_repository`, `create_branch`, etc.
+
+## Testing the Setup
+
+### Test 1: List Your Repositories
+
+Ask BOB:
+```
+"Use the list_repositories tool to show my GitHub repositories"
+```
+
+Expected: List of your repositories with issue counts
+
+### Test 2: Fetch Issues
+
+Ask BOB:
+```
+"Use fetch_issues to get open bug issues from owner/repo"
+```
+
+Replace `owner/repo` with one of your actual repositories.
+
+Expected: List of open issues with bug label
+
+### Test 3: Clone a Repository
+
+Ask BOB:
+```
+"Use clone_repository to clone owner/repo to the workspace"
+```
+
+Expected: Repository cloned to `services/git-ops/workspace/owner/repo`
+
+### Test 4: Full Workflow Test
+
+Ask BOB:
+```
+"Scan my test repository for issues, prioritize them, and show me the top 3"
+```
+
+Expected: Prioritized list of issues ready for fixing
+
+## Troubleshooting
+
+### Issue: "Cannot find module" errors
+
+**Solution**: Make sure you've run `pnpm build` in both service directories:
+```bash
+cd services/issue-scanner && pnpm build
+cd ../git-ops && pnpm build
+```
+
+### Issue: "Authentication failed" or "Bad credentials"
+
+**Solution**: 
+1. Check your GitHub token is correct in `.env` files
+2. Verify token hasn't expired
+3. Ensure token has `repo` scope
+
+### Issue: MCP tools not showing up
+
+**Solution**:
+1. Verify MCP config file paths are absolute (not relative)
+2. Check services are built (`dist/index.js` exists)
+3. Restart your MCP client completely
+4. Check for errors in MCP client logs
+
+### Issue: "EACCES: permission denied"
+
+**Solution**: Ensure the workspace directory is writable:
+```bash
+mkdir -p services/git-ops/workspace
+chmod 755 services/git-ops/workspace
+```
+
+### Issue: Rate limit errors
+
+**Solution**: 
+- GitHub API has rate limits (5000 requests/hour for authenticated users)
+- Wait an hour or use a different token
+- Check current rate limit: `curl -H "Authorization: token YOUR_TOKEN" https://api.github.com/rate_limit`
+
+### Issue: Git operations fail
+
+**Solution**:
+1. Ensure Git is installed: `git --version`
+2. Configure Git identity:
+   ```bash
+   git config --global user.name "Your Name"
+   git config --global user.email "your.email@example.com"
+   ```
+3. Check GitHub token has push permissions
+
+## Advanced Configuration
+
+### Using with Organizations
+
+If working with organization repositories:
+
+1. Ensure your token has `read:org` scope
+2. Add org repos to config: `"org-name/repo-name"`
+3. You may need org admin approval for some operations
+
+### Custom Workspace Location
+
+To use a different workspace directory:
+
+1. Edit `services/git-ops/.env`:
+   ```bash
+   WORKSPACE_DIR=/path/to/your/workspace
+   ```
+2. Ensure the directory exists and is writable
+
+### Multiple GitHub Accounts
+
+To work with multiple GitHub accounts:
+
+1. Create separate service instances with different tokens
+2. Configure different MCP server names in your client
+3. Specify which service to use when asking BOB
+
+## Next Steps
+
+Once setup is complete:
+1. Read [USAGE.md](./USAGE.md) for usage examples
+2. Try the example workflows
+3. Customize the configuration for your needs
+4. Start fixing bugs automatically!
+
+## Getting Help
+
+If you encounter issues:
+1. Check the troubleshooting section above
+2. Review service logs for error messages
+3. Verify all prerequisites are met
+4. Check GitHub API status: https://www.githubstatus.com/
