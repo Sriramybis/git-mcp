@@ -106,9 +106,9 @@ pnpm build
 
 Choose your MCP client and follow the appropriate configuration:
 
-#### Option A: Cursor
+#### IBM Bob Configuration
 
-Edit `~/.cursor/mcp.json`:
+Edit your IBM Bob MCP configuration file (check IBM Bob documentation for exact location, typically `~/.bob/mcp.json` or in Bob's settings directory):
 
 ```json
 {
@@ -244,8 +244,8 @@ Edit `config/bug-fix-config.json`:
 
 After configuration:
 
-1. **Cursor**: Restart Cursor completely
-2. **Claude Desktop**: Quit and reopen Claude Desktop
+1. **IBM Bob**: Restart IBM Bob completely
+2. **Other MCP Clients**: Restart your MCP client application
 3. **Windsurf**: Restart Windsurf
 
 ### 8. Verify Setup

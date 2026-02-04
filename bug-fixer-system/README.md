@@ -52,7 +52,7 @@ echo "GITHUB_TOKEN=ghp_your_token_here" >> services/git-ops/.env
 
 ### 3. Setup MCP Client
 
-Add to your MCP client configuration (e.g., `~/.cursor/mcp.json`):
+Add to your MCP client configuration. For IBM Bob, the configuration file is typically located at `~/.bob/mcp.json` or in your IBM Bob settings directory:
 
 ```json
 {
@@ -201,7 +201,7 @@ Plus: GitMCP for documentation and code search
 
 - Node.js 18+
 - GitHub account with repo access
-- MCP-compatible client (Cursor, Claude Desktop, Windsurf, etc.)
+- IBM Bob IDE (MCP-compatible AI development environment)
 - GitHub Personal Access Token with `repo` scope
 
 ## 🤝 Contributing

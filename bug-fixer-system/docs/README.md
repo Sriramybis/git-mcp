@@ -74,9 +74,9 @@ bug-fixer-system/
 
 ### Prerequisites
 
-- Node.js 18+ and pnpm
+- Node.js 18+ and npm/pnpm
 - GitHub Personal Access Token with `repo` permissions
-- BOB AI Assistant (Cursor, Claude Desktop, or compatible MCP client)
+- IBM Bob IDE (MCP-compatible AI development environment)
 
 ### 1. Setup Services
 
@@ -104,7 +104,27 @@ pnpm build
 
 Add both services to your MCP client configuration:
 
-**For Cursor** (`~/.cursor/mcp.json`):
+**For IBM Bob** (check Bob's documentation for config location, typically `~/.bob/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "gitmcp": {
+      "url": "https://gitmcp.io/docs"
+    },
+    "issue-scanner": {
+      "command": "node",
+      "args": ["/path/to/bug-fixer-system/services/issue-scanner/dist/index.js"]
+    },
+    "git-ops": {
+      "command": "node",
+      "args": ["/path/to/bug-fixer-system/services/git-ops/dist/index.js"]
+    }
+  }
+}
+```
+
+**For IBM Bob** (check IBM Bob documentation for exact location, typically `~/.bob/mcp.json`):
 
 ```json
 {
@@ -281,9 +301,10 @@ BOB will execute the full workflow as described in the "How It Works" section.
 - Run `pnpm install` in each service directory
 
 ### MCP tools not available
-- Restart your MCP client (Cursor/Claude)
-- Check MCP configuration paths are correct
-- Verify services are built (`pnpm build`)
+- Restart IBM Bob completely
+- Check MCP configuration paths are correct and absolute
+- Verify MCP config file location for your client
+- Verify services are built (`npm run build`)
 
 ### GitHub API errors
 - Check token has correct permissions (`repo`, `read:org`)
